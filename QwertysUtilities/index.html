@@ -1,1 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Qwerty's Utilities</title>
+
+  <link rel="icon" type="image/x-icon" href="swirl_32x32.ico">
+
+  <style>
+    body {
+      background-color: #09000F;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .circle-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #FFFFFF;
+      font-size: 24px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .button {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+
+      background-color: #600596;
+      color: #FFFFFF;
+
+      font-size: 14px;
+      cursor: pointer;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      transition: transform 0.2s ease;
+    }
+
+    .button:hover {
+      transform: scale(1.1);
+    }
+
+    .button.shrink {
+      transform: scale(0.9);
+    }
+
+    .tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+
+      transform: translateX(-50%) translateY(-8px);
+
+      background-color: #333333;
+      color: #FFFFFF;
+
+      padding: 4px 8px;
+      border-radius: 4px;
+
+      font-size: 14px;
+      white-space: nowrap;
+
+      opacity: 0;
+      pointer-events: none;
+
+      transition: opacity 0.2s ease;
+    }
+
+    .button:hover .tooltip {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="circle-container" id="circleContainer">
+    <div class="center-text">Qwerty's Utilities</div>
+  </div>
+
+  <script>
+    const container = document.getElementById('circleContainer');
+
+    const buttons = [
+      {
+        label: 'Dictionary',
+        url: 'QwertysUtilities/WeaponDictionary.html'
+      },
+      {
+        label: 'Ranks & Tree',
+        url: '#'
+      },
+      {
+        label: 'In progress',
+        url: '#'
+      },
+      {
+        label: 'In progress',
+        url: '#'
+      },
+      {
+        label: 'In progress',
+        url: '#'
+      }
+    ];
+
+    const radius = 120;
+    const centerX = 150;
+    const centerY = 150;
+
+    buttons.forEach((buttonData, index) => {
+      const angle =
+        (-Math.PI / 2) +
+        (index * 2 * Math.PI) / buttons.length;
+
+      const x = centerX + radius * Math.cos(angle) - 40;
+      const y = centerY + radius * Math.sin(angle) - 40;
+
+      const button = document.createElement('button');
+
+      button.className = 'button';
+      button.style.left = `${x}px`;
+      button.style.top = `${y}px`;
+
+      button.textContent = buttonData.label;
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.textContent = buttonData.label;
+
+      button.appendChild(tooltip);
+
+      button.addEventListener('click', () => {
+        button.classList.add('shrink');
+
+        setTimeout(() => {
+          button.classList.remove('shrink');
+        }, 200);
+
+        if (buttonData.url !== '#') {
+          window.location.href = buttonData.url;
+        }
+      });
+
+      container.appendChild(button);
+    });
+  </script>
+</body>
+</html>
