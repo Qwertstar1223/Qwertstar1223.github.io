@@ -34,12 +34,31 @@
       font-size: 24px;
       font-weight: bold;
       white-space: nowrap;
+      z-index: 2;
+    }
+
+    /* Temporary ring */
+    .ring {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      left: 190px;
+      top: 190px;
+      z-index: 0;
+    }
+
+    .ring-line {
+      position: absolute;
+      width: 2px;
+      height: 1px;
+      background-color: #FFFFFF;
+      transform-origin: left center;
     }
 
     .button {
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       padding: 0;
       border: none;
       border-radius: 50%;
@@ -55,6 +74,8 @@
       align-items: center;
 
       transition: transform 0.2s ease;
+
+      z-index: 1;
     }
 
     .button:hover {
@@ -128,56 +149,97 @@
       }
     ];
 
-    /*
-      ==============================
-      BUTTON LAYOUT SETTINGS
-      ==============================
-
-      range:
-        Maximum absolute angle from
-        straight up.
-
-        0°   = straight up
-        90°  = left/right
-        180° = straight down
-
-        Buttons are spread between
-        -range and +range.
-
-      distance:
-        Distance from the center.
-
-      stretch:
-        Horizontal stretching.
-
-        0 = normal circle
-        Higher values = more stretching.
-    */
-
+    // Button spacing / ring settings
     const range = 120;
-    const distance = 170;
-    const stretch = 1.18;
+    const distance = 150;
+    const stretch = 1.5;
 
-    const buttonSize = 100;
+    const buttonSize = 90;
 
     const centerX = 190;
     const centerY = 190;
 
 
-    /*
-      ==============================
-      CREATE BUTTONS
-      ==============================
-    */
+    // ==========================================
+    // TEMPORARY RING
+    // ==========================================
+
+    const ring = document.createElement('div');
+
+    ring.className = 'ring';
+
+    const ringSteps = 200;
+
+    let previousX = null;
+    let previousY = null;
+
+    for (let i = 0; i <= ringSteps; i++) {
+
+      const angle =
+        -range +
+        (i / ringSteps) * (range * 2);
+
+      const radians =
+        angle * Math.PI / 180;
+
+      const x =
+        Math.sin(radians) *
+        distance *
+        stretch;
+
+      const y =
+        -Math.cos(radians) *
+        distance;
+
+      if (previousX !== null) {
+
+        const dx = x - previousX;
+        const dy = y - previousY;
+
+        const length =
+          Math.sqrt(
+            dx * dx +
+            dy * dy
+          );
+
+        const rotation =
+          Math.atan2(dy, dx) *
+          180 / Math.PI;
+
+        const line =
+          document.createElement('div');
+
+        line.className = 'ring-line';
+
+        line.style.width =
+          `${length}px`;
+
+        line.style.left =
+          `${previousX}px`;
+
+        line.style.top =
+          `${previousY}px`;
+
+        line.style.transform =
+          `rotate(${rotation}deg)`;
+
+        ring.appendChild(line);
+      }
+
+      previousX = x;
+      previousY = y;
+    }
+
+    container.appendChild(ring);
+
+
+    // ==========================================
+    // BUTTONS
+    // ==========================================
+
+    const amount = buttons.length;
 
     buttons.forEach((buttonData, index) => {
-
-      const amount = buttons.length;
-
-      /*
-        Spread the buttons evenly between
-        -range and +range.
-      */
 
       let angle;
 
@@ -186,83 +248,61 @@
       } else {
         angle =
           -range +
-          (index * (range * 2)) / (amount - 1);
+          (index * (range * 2)) /
+          (amount - 1);
       }
 
-      /*
-        Convert degrees to radians.
-      */
+      const radians =
+        angle * Math.PI / 180;
 
-      const radians = angle * Math.PI / 180;
+      const ringX =
+        Math.sin(radians) *
+        distance;
 
+      const ringY =
+        -Math.cos(radians) *
+        distance;
 
-      /*
-        Move forward by distance.
+      // Stretch the ring horizontally
+      const stretchedX =
+        ringX * stretch;
 
-        0° points directly upward.
-      */
-
-      let x =
-        Math.sin(radians) * distance;
-
-      let y =
-        -Math.cos(radians) * distance;
-
-
-      /*
-        ==============================
-        HORIZONTAL STRETCH
-        ==============================
-
-        Applied after moving forward,
-        matching the Scratch prototype.
-      */
-
-      x += distance * ((x / 180) * stretch);
-
-
-      /*
-        Convert to CSS coordinates.
-      */
+      const stretchedY =
+        ringY;
 
       const left =
-        centerX + x - buttonSize / 2;
+        centerX +
+        stretchedX -
+        buttonSize / 2;
 
       const top =
-        centerY + y - buttonSize / 2;
+        centerY +
+        stretchedY -
+        buttonSize / 2;
 
-
-      /*
-        ==============================
-        CREATE BUTTON
-        ==============================
-      */
-
-      const button = document.createElement('button');
+      const button =
+        document.createElement('button');
 
       button.className = 'button';
 
-      button.style.left = `${left}px`;
-      button.style.top = `${top}px`;
+      button.style.left =
+        `${left}px`;
 
-      button.textContent = buttonData.label;
+      button.style.top =
+        `${top}px`;
 
+      button.textContent =
+        buttonData.label;
 
-      /*
-        Tooltip
-      */
-
-      const tooltip = document.createElement('div');
+      const tooltip =
+        document.createElement('div');
 
       tooltip.className = 'tooltip';
-      tooltip.textContent = buttonData.label;
+
+      tooltip.textContent =
+        buttonData.label;
 
       button.appendChild(tooltip);
-
-
-      /*
-        Click animation
-      */
 
       button.addEventListener('click', () => {
 
@@ -273,10 +313,10 @@
         }, 200);
 
         if (buttonData.url !== '#') {
-          window.location.href = buttonData.url;
+          window.location.href =
+            buttonData.url;
         }
       });
-
 
       container.appendChild(button);
     });
