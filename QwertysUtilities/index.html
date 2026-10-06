@@ -37,22 +37,20 @@
       z-index: 2;
     }
 
-    /* Temporary ring */
     .ring {
       position: absolute;
-      width: 1px;
-      height: 1px;
-      left: 190px;
-      top: 190px;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 0;
+      pointer-events: none;
+      overflow: visible;
     }
 
-    .ring-line {
-      position: absolute;
-      width: 2px;
-      height: 1px;
-      background-color: #FFFFFF;
-      transform-origin: left center;
+    .ring-path {
+      fill: none;
+      stroke: #003D2B;
+      stroke-width: 6;
     }
 
     .button {
@@ -63,7 +61,7 @@
       border: none;
       border-radius: 50%;
 
-      background-color: #059600;
+      background-color: #00CC88;
       color: #FFFFFF;
 
       font-size: 14px;
@@ -116,11 +114,24 @@
 
 <body>
   <div class="circle-container" id="circleContainer">
+
+    <svg
+      class="ring"
+      viewBox="0 0 380 380"
+      preserveAspectRatio="none"
+    >
+      <path
+        id="ringPath"
+        class="ring-path"
+      />
+    </svg>
+
     <div class="center-text">Qwerty's Utilities</div>
   </div>
 
   <script>
-    const container = document.getElementById('circleContainer');
+    const container =
+      document.getElementById('circleContainer');
 
     const buttons = [
       {
@@ -144,14 +155,13 @@
         url: '#'
       },
       {
-        label: 'In progress',
+        label: 'Test 6',
         url: '#'
       }
     ];
 
-    // Button spacing / ring settings
     const range = 120;
-    const distance = 150;
+    const distance = 170;
     const stretch = 1.5;
 
     const buttonSize = 90;
@@ -161,17 +171,15 @@
 
 
     // ==========================================
-    // TEMPORARY RING
+    // RING
     // ==========================================
 
-    const ring = document.createElement('div');
-
-    ring.className = 'ring';
+    const ringPath =
+      document.getElementById('ringPath');
 
     const ringSteps = 200;
 
-    let previousX = null;
-    let previousY = null;
+    let pathData = '';
 
     for (let i = 0; i <= ringSteps; i++) {
 
@@ -183,54 +191,27 @@
         angle * Math.PI / 180;
 
       const x =
+        centerX +
         Math.sin(radians) *
         distance *
         stretch;
 
       const y =
-        -Math.cos(radians) *
+        centerY -
+        Math.cos(radians) *
         distance;
 
-      if (previousX !== null) {
-
-        const dx = x - previousX;
-        const dy = y - previousY;
-
-        const length =
-          Math.sqrt(
-            dx * dx +
-            dy * dy
-          );
-
-        const rotation =
-          Math.atan2(dy, dx) *
-          180 / Math.PI;
-
-        const line =
-          document.createElement('div');
-
-        line.className = 'ring-line';
-
-        line.style.width =
-          `${length}px`;
-
-        line.style.left =
-          `${previousX}px`;
-
-        line.style.top =
-          `${previousY}px`;
-
-        line.style.transform =
-          `rotate(${rotation}deg)`;
-
-        ring.appendChild(line);
+      if (i === 0) {
+        pathData += `M ${x} ${y}`;
+      } else {
+        pathData += ` L ${x} ${y}`;
       }
-
-      previousX = x;
-      previousY = y;
     }
 
-    container.appendChild(ring);
+    ringPath.setAttribute(
+      'd',
+      pathData
+    );
 
 
     // ==========================================
@@ -263,7 +244,6 @@
         -Math.cos(radians) *
         distance;
 
-      // Stretch the ring horizontally
       const stretchedX =
         ringX * stretch;
 
